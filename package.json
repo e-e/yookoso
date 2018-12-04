@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env NODE_ENV=prod node ./server/index.js",
     "dev-serve": "cross-env NODE_ENV=dev nodemon ./server/index.js",
-    "dev-app": "parcel watch ./app/index.html --out-dir=public --public-url=./assets/",
+    "dev-app": "parcel watch ./app/index.html --out-dir=public --public-url=/assets/",
     "dev": "concurrently \"npm:dev-*\""
   },
   "author": "Eric Ellingson <god@eric.wtf> (http://eric.wtf/)",

@@ -26935,7 +26935,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.selectBook = selectBook;
 exports.selectChapter = selectChapter;
 exports.selectTrack = selectTrack;
-exports.FETCHED_DATA = exports.FETCH_DATA = exports.DESELECT_TRACK = exports.SELECT_TRACK = exports.DESELECT_CHAPTER = exports.SELECT_CHAPTER = exports.DESELECT_BOOK = exports.SELECT_BOOK = void 0;
+exports.fetchData = fetchData;
+exports.fetchedData = fetchedData;
+exports.toggleAutoplay = toggleAutoplay;
+exports.toggleAutoAdvance = toggleAutoAdvance;
+exports.TOGGLE_AUTO_ADVANCE = exports.TOGGLE_AUTOPLAY = exports.FETCHED_DATA = exports.FETCH_DATA = exports.DESELECT_TRACK = exports.SELECT_TRACK = exports.DESELECT_CHAPTER = exports.SELECT_CHAPTER = exports.DESELECT_BOOK = exports.SELECT_BOOK = void 0;
 var SELECT_BOOK = 'SELECT_BOOK';
 exports.SELECT_BOOK = SELECT_BOOK;
 var DESELECT_BOOK = 'DESELECT_BOOK';
@@ -26952,6 +26956,10 @@ var FETCH_DATA = 'FETCH_DATA';
 exports.FETCH_DATA = FETCH_DATA;
 var FETCHED_DATA = 'FETCHED_DATA';
 exports.FETCHED_DATA = FETCHED_DATA;
+var TOGGLE_AUTOPLAY = 'TOGGLE_AUTOPLAY';
+exports.TOGGLE_AUTOPLAY = TOGGLE_AUTOPLAY;
+var TOGGLE_AUTO_ADVANCE = 'TOGGLE_AUTO_ADVANCE';
+exports.TOGGLE_AUTO_ADVANCE = TOGGLE_AUTO_ADVANCE;
 
 function selectBook(book) {
   console.log('SELECT_BOOK', book);
@@ -26980,6 +26988,83 @@ function selectTrack(track) {
     });
   };
 }
+
+function fetchData() {
+  return function (dispatch, getState) {
+    dispatch({
+      type: FETCH_DATA
+    });
+  };
+}
+
+function fetchedData(data) {
+  return function (dispatch, getState) {
+    dispatch({
+      type: FETCHED_DATA,
+      data: data
+    });
+  };
+}
+
+function toggleAutoplay() {
+  console.log('toggle autoplay');
+  return function (dispatch) {
+    dispatch({
+      type: TOGGLE_AUTOPLAY
+    });
+  };
+}
+
+function toggleAutoAdvance() {
+  console.log('toggleAutoAdvance');
+  return function (dispatch) {
+    console.log('dispatch toggleAutoAdvance');
+    dispatch({
+      type: TOGGLE_AUTO_ADVANCE
+    });
+  };
+}
+},{}],"src/utils/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.arr = arr;
+exports.setLocalSettings = setLocalSettings;
+exports.getLocalSettings = getLocalSettings;
+
+function arr(object) {
+  var keys = Object.keys(object);
+  var array = [];
+
+  for (var i = 0; i < keys.length; i++) {
+    array.push(object[keys[i]]);
+  }
+
+  return array;
+}
+
+var SETTINGS_KEY = 'settings';
+
+function setLocalSettings(settings) {
+  if (window.localStorage) {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+}
+
+function getLocalSettings(settings) {
+  if (window.localStorage && localStorage.getItem(SETTINGS_KEY) !== null) {
+    console.log(localStorage.getItem(SETTINGS_KEY));
+    var localSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+
+    if (localSettings) {
+      settings = localSettings;
+    }
+  }
+
+  return settings;
+}
 },{}],"src/reducers/index.js":[function(require,module,exports) {
 "use strict";
 
@@ -26992,6 +27077,12 @@ var _redux = require("redux");
 
 var _actions = require("../actions");
 
+var _utils = require("../utils");
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /**
  * @param {String} state
  * @param {Object} action
@@ -26999,7 +27090,7 @@ var _actions = require("../actions");
  * @param {String} action.book
  * @returns {String}
  */
-function book() {
+function books() {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
@@ -27009,6 +27100,9 @@ function book() {
 
     case _actions.DESELECT_BOOK:
       return '';
+
+    case _actions.FETCHED_DATA:
+      return action.data.books;
 
     default:
       return state;
@@ -27023,7 +27117,7 @@ function book() {
  */
 
 
-function chapter() {
+function chapters() {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
@@ -27034,57 +27128,92 @@ function chapter() {
     case _actions.DESELECT_CHAPTER:
       return '';
 
-    default:
-      return state;
-  }
-}
-/**
- * @param {String} state
- * @param {Object} action
- * @param {String} action.type
- * @param {String} action.track
- * @returns {String}
- */
-
-
-function track() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  var action = arguments.length > 1 ? arguments[1] : undefined;
-
-  switch (action.type) {
-    case _actions.SELECT_TRACK:
-      return action.track;
-
-    case _actions.DESELECT_TRACK:
-      return '';
+    case _actions.FETCHED_DATA:
+      return action.data.chapters;
 
     default:
       return state;
   }
 }
+
+var DEFAULT_TRACKS = {};
 
 function tracks() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_TRACKS;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action.type) {
     case _actions.FETCH_DATA:
       return state;
 
+    case _actions.FETCHED_DATA:
+      return action.data.tracks;
+
     default:
       return state;
   }
 }
 
+var DEFAULT_STATE_LOADED = false;
+
+function loaded() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_STATE_LOADED;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case _actions.FETCH_DATA:
+      return DEFAULT_STATE_LOADED;
+
+    case _actions.FETCHED_DATA:
+      return true;
+
+    default:
+      return state;
+  }
+}
+
+var DEFAULT_SETTINGS = (0, _utils.getLocalSettings)({
+  autoplay: true,
+  autoAdvance: true
+});
+
+function settings() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_SETTINGS;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+  var newSettings = state;
+
+  switch (action.type) {
+    case _actions.TOGGLE_AUTOPLAY:
+      console.log('toggling autoplay...');
+      newSettings = _objectSpread({}, state, {
+        autoplay: !state.autoplay
+      });
+      break;
+
+    case _actions.TOGGLE_AUTO_ADVANCE:
+      newSettings = _objectSpread({}, state, {
+        autoAdvance: !state.autoAdvance
+      });
+      break;
+
+    default:
+      break;
+  }
+
+  (0, _utils.setLocalSettings)(newSettings);
+  return newSettings;
+}
+
 var rootReducer = (0, _redux.combineReducers)({
-  book: book,
-  chapter: chapter,
-  track: track,
-  tracks: tracks
+  books: books,
+  chapters: chapters,
+  tracks: tracks,
+  loaded: loaded,
+  settings: settings
 });
 var _default = rootReducer;
 exports.default = _default;
-},{"redux":"../node_modules/redux/es/redux.js","../actions":"src/actions/index.js"}],"../node_modules/warning/warning.js":[function(require,module,exports) {
+},{"redux":"../node_modules/redux/es/redux.js","../actions":"src/actions/index.js","../utils":"src/utils/index.js"}],"../node_modules/warning/warning.js":[function(require,module,exports) {
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -30941,7 +31070,358 @@ var _matchPath2 = _interopRequireDefault(require("./matchPath"));
 var _withRouter2 = _interopRequireDefault(require("./withRouter"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./BrowserRouter":"../node_modules/react-router-dom/es/BrowserRouter.js","./HashRouter":"../node_modules/react-router-dom/es/HashRouter.js","./Link":"../node_modules/react-router-dom/es/Link.js","./MemoryRouter":"../node_modules/react-router-dom/es/MemoryRouter.js","./NavLink":"../node_modules/react-router-dom/es/NavLink.js","./Prompt":"../node_modules/react-router-dom/es/Prompt.js","./Redirect":"../node_modules/react-router-dom/es/Redirect.js","./Route":"../node_modules/react-router-dom/es/Route.js","./Router":"../node_modules/react-router-dom/es/Router.js","./StaticRouter":"../node_modules/react-router-dom/es/StaticRouter.js","./Switch":"../node_modules/react-router-dom/es/Switch.js","./generatePath":"../node_modules/react-router-dom/es/generatePath.js","./matchPath":"../node_modules/react-router-dom/es/matchPath.js","./withRouter":"../node_modules/react-router-dom/es/withRouter.js"}],"src/components/Layout.js":[function(require,module,exports) {
+},{"./BrowserRouter":"../node_modules/react-router-dom/es/BrowserRouter.js","./HashRouter":"../node_modules/react-router-dom/es/HashRouter.js","./Link":"../node_modules/react-router-dom/es/Link.js","./MemoryRouter":"../node_modules/react-router-dom/es/MemoryRouter.js","./NavLink":"../node_modules/react-router-dom/es/NavLink.js","./Prompt":"../node_modules/react-router-dom/es/Prompt.js","./Redirect":"../node_modules/react-router-dom/es/Redirect.js","./Route":"../node_modules/react-router-dom/es/Route.js","./Router":"../node_modules/react-router-dom/es/Router.js","./StaticRouter":"../node_modules/react-router-dom/es/StaticRouter.js","./Switch":"../node_modules/react-router-dom/es/Switch.js","./generatePath":"../node_modules/react-router-dom/es/generatePath.js","./matchPath":"../node_modules/react-router-dom/es/matchPath.js","./withRouter":"../node_modules/react-router-dom/es/withRouter.js"}],"src/errors/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.TrackNotFoundError = exports.ChapterNotFoundError = exports.BookNotFoundError = void 0;
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var BookNotFoundError =
+/*#__PURE__*/
+function (_Error) {
+  _inherits(BookNotFoundError, _Error);
+
+  function BookNotFoundError() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, BookNotFoundError);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(BookNotFoundError)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    Error.captureStackTrace(_assertThisInitialized(_assertThisInitialized(_this)), BookNotFoundError);
+    return _this;
+  }
+
+  return BookNotFoundError;
+}(_wrapNativeSuper(Error));
+
+exports.BookNotFoundError = BookNotFoundError;
+
+var ChapterNotFoundError =
+/*#__PURE__*/
+function (_Error2) {
+  _inherits(ChapterNotFoundError, _Error2);
+
+  function ChapterNotFoundError() {
+    var _getPrototypeOf3;
+
+    var _this2;
+
+    _classCallCheck(this, ChapterNotFoundError);
+
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(ChapterNotFoundError)).call.apply(_getPrototypeOf3, [this].concat(args)));
+    Error.captureStackTrace(_assertThisInitialized(_assertThisInitialized(_this2)), ChapterNotFoundError);
+    return _this2;
+  }
+
+  return ChapterNotFoundError;
+}(_wrapNativeSuper(Error));
+
+exports.ChapterNotFoundError = ChapterNotFoundError;
+
+var TrackNotFoundError =
+/*#__PURE__*/
+function (_Error3) {
+  _inherits(TrackNotFoundError, _Error3);
+
+  function TrackNotFoundError() {
+    var _getPrototypeOf4;
+
+    var _this3;
+
+    _classCallCheck(this, TrackNotFoundError);
+
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
+
+    _this3 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(TrackNotFoundError)).call.apply(_getPrototypeOf4, [this].concat(args)));
+    Error.captureStackTrace(_assertThisInitialized(_assertThisInitialized(_this3)), TrackNotFoundError);
+    return _this3;
+  }
+
+  return TrackNotFoundError;
+}(_wrapNativeSuper(Error));
+
+exports.TrackNotFoundError = TrackNotFoundError;
+},{}],"src/controllers/BaseController.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _errors = require("../errors");
+
+var _actions = require("../actions");
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var endpoint = '/api/tracks';
+
+var BaseController =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(BaseController, _Component);
+
+  function BaseController() {
+    _classCallCheck(this, BaseController);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(BaseController).apply(this, arguments));
+  }
+
+  _createClass(BaseController, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this = this;
+
+      if (!this.props.loaded) {
+        fetch(endpoint).then(function (response) {
+          if (!response.ok) {
+            throw Error(response.statusText);
+          }
+
+          return response;
+        }).then(function (response) {
+          return response.json();
+        }).then(function (json) {
+          setTimeout(function () {
+            _this.props.dispatch((0, _actions.fetchedData)(json));
+          }, 2000);
+        });
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return _react.default.createElement("div", null, _react.default.createElement("code", null, "render()"), " method needs to be defined");
+    }
+  }, {
+    key: "book",
+    get: function get() {
+      var books = this.books;
+      var bookName = this.props.match.params.book;
+      var bookIds = Object.keys(books);
+
+      for (var i = 0; i < bookIds.length; i++) {
+        var book = books[bookIds[i]];
+
+        if (book.name.toLowerCase() === bookName.toLowerCase()) {
+          return book;
+        }
+      }
+
+      throw new _errors.BookNotFoundError("Could not find book [".concat(bookName, "]"));
+    }
+  }, {
+    key: "chapter",
+    get: function get() {
+      var chapters = this.chapters;
+      var chapterNumber = this.props.match.params.chapter.replace(/^ch-/, '');
+      var chapterIds = Object.keys(chapters);
+
+      for (var i = 0; i < chapterIds.length; i++) {
+        var chapter = chapters[chapterIds[i]];
+
+        if (parseInt(chapter.number, 10) === parseInt(chapterNumber, 10) && this.book.id === chapter.book_id) {
+          return chapter;
+        }
+      }
+
+      throw new _errors.ChapterNotFoundError("Could not find chapter [".concat(chapterName, "]"));
+    }
+  }, {
+    key: "track",
+    get: function get() {
+      var book = this.book;
+      var chapter = this.chapter;
+      var tracks = this.tracks;
+      var trackNumber = this.props.match.params.track;
+      var trackIds = Object.keys(tracks);
+
+      for (var i = 0; i < trackIds.length; i++) {
+        var track = tracks[trackIds[i]];
+        var correctBook = book.id === track.book_id;
+        var correctChapter = chapter.id === track.chapter_id;
+        var correctTrack = parseInt(track.number, 10) === parseInt(trackNumber, 10);
+
+        if (correctBook && correctChapter && correctTrack) {
+          return track;
+        }
+      }
+
+      throw new _errors.TrackNotFoundError("Could not find track [".concat(trackNumber, "]"));
+    }
+  }, {
+    key: "books",
+    get: function get() {
+      return this.props.books;
+    }
+  }, {
+    key: "chapters",
+    get: function get() {
+      return this.props.chapters;
+    }
+  }, {
+    key: "tracks",
+    get: function get() {
+      return this.props.tracks;
+    }
+  }]);
+
+  return BaseController;
+}(_react.Component);
+
+var _default = BaseController;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","../errors":"src/errors/index.js","../actions":"src/actions/index.js"}],"src/components/Nav.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactRouterDom = require("react-router-dom");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Nav = function Nav(props) {
+  console.dir(props);
+  return null;
+  return _react.default.createElement("nav", null, _react.default.createElement("button", {
+    className: "back-button",
+    onClick: function onClick() {
+      return props.history.goBack();
+    }
+  }, "\u2039 Back"));
+};
+
+var _default = (0, _reactRouterDom.withRouter)(Nav);
+
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js"}],"src/components/TitleBar.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactRouterDom = require("react-router-dom");
+
+var _Nav = _interopRequireDefault(require("./Nav"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Back = (0, _reactRouterDom.withRouter)(function (props) {
+  var history = props.history;
+  console.log('HISTORY', history);
+  return history.location.pathname !== "/" ? _react.default.createElement("button", {
+    className: "back-button top-left",
+    onClick: function onClick() {
+      return history.goBack();
+    }
+  }, "\u2039 Back") : null;
+});
+
+var TitleBar = function TitleBar(props) {
+  return _react.default.createElement("div", {
+    className: "title-bar"
+  }, _react.default.createElement("div", {
+    className: "back"
+  }, _react.default.createElement(Back, null)), _react.default.createElement("div", {
+    className: "title"
+  }, _react.default.createElement(_reactRouterDom.Link, {
+    to: "/"
+  }, "\u3088\u3046\u3053\u305D\uFF01")));
+};
+
+var _default = TitleBar;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./Nav":"src/components/Nav.js"}],"src/components/Layout.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _TitleBar = _interopRequireDefault(require("./TitleBar"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Layout = function Layout(props) {
+  return _react.default.createElement("div", {
+    className: "app-wrap"
+  }, _react.default.createElement(_TitleBar.default, null), _react.default.createElement("div", {
+    className: "content-wrap"
+  }, props.children));
+};
+
+var _default = Layout;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./TitleBar":"src/components/TitleBar.js"}],"src/components/ListItem.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30953,11 +31433,14 @@ var _react = _interopRequireDefault(require("react"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Layout = function Layout(props) {
-  return _react.default.createElement("div", null, props.children);
+var ListItem = function ListItem(props) {
+  var className = ['list-item', props.className || ''].join(' ').trim();
+  return _react.default.createElement("li", {
+    className: className
+  }, props.children);
 };
 
-var _default = Layout;
+var _default = ListItem;
 exports.default = _default;
 },{"react":"../node_modules/react/index.js"}],"src/components/Book.js":[function(require,module,exports) {
 "use strict";
@@ -30969,25 +31452,720 @@ exports.default = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _reactRouterDom = require("react-router-dom");
+
+var _ListItem = _interopRequireDefault(require("./ListItem"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function click(book, callback) {
-  console.log('clickeD!');
-  console.log('book: ', book);
-  callback(book);
-}
-
 var Book = function Book(props) {
-  return _react.default.createElement("div", {
-    onClick: function onClick(event) {
-      return click(props.book, props.onBookSelected);
-    }
-  }, props.book);
+  var href = '/' + props.book.name.toLowerCase();
+  console.log('Chapter.href:', href);
+  return _react.default.createElement(_reactRouterDom.Link, {
+    to: href,
+    className: "book-link"
+  }, _react.default.createElement(_ListItem.default, {
+    className: "book"
+  }, props.book.name));
 };
 
 var _default = Book;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js"}],"src/components/BookSelect.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./ListItem":"src/components/ListItem.js"}],"src/components/List.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var List = function List(props) {
+  var className = ['list', props.className || ''].join(' ').trim();
+  return _react.default.createElement("ul", {
+    className: className
+  }, props.children);
+};
+
+var _default = List;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js"}],"src/components/BookList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _Book = _interopRequireDefault(require("./Book"));
+
+var _List = _interopRequireDefault(require("./List"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var BookList =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(BookList, _Component);
+
+  function BookList() {
+    _classCallCheck(this, BookList);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(BookList).apply(this, arguments));
+  }
+
+  _createClass(BookList, [{
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      var books = Object.keys(this.props.books);
+      var bookList = books.map(function (id) {
+        return _this.props.books[id];
+      });
+      return _react.default.createElement(_List.default, {
+        className: "book-list"
+      }, bookList.map(function (book) {
+        return _react.default.createElement(_Book.default, {
+          book: book,
+          key: book.id
+        });
+      }));
+    }
+  }]);
+
+  return BookList;
+}(_react.Component);
+
+var _default = BookList;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./Book":"src/components/Book.js","./List":"src/components/List.js"}],"src/components/Loading.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Loading = function Loading(props) {
+  return _react.default.createElement("div", null, _react.default.createElement("img", {
+    id: "loading",
+    src: "/assets/loading.gif"
+  }));
+};
+
+var _default = Loading;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js"}],"src/controllers/BookListController.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _BaseController2 = _interopRequireDefault(require("./BaseController"));
+
+var _Layout = _interopRequireDefault(require("../components/Layout"));
+
+var _BookList = _interopRequireDefault(require("../components/BookList"));
+
+var _reactRedux = require("react-redux");
+
+var _Loading = _interopRequireDefault(require("../components/Loading"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var BookListController =
+/*#__PURE__*/
+function (_BaseController) {
+  _inherits(BookListController, _BaseController);
+
+  function BookListController() {
+    _classCallCheck(this, BookListController);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(BookListController).apply(this, arguments));
+  }
+
+  _createClass(BookListController, [{
+    key: "render",
+    value: function render() {
+      console.log('BookListController.props: ', this.props);
+
+      if (!this.props.loaded) {
+        return _react.default.createElement(_Loading.default, null);
+      }
+
+      return _react.default.createElement(_BookList.default, {
+        books: this.books
+      });
+    }
+  }]);
+
+  return BookListController;
+}(_BaseController2.default);
+
+var mapStateToProps = function mapStateToProps(state) {
+  console.log('STATE', state);
+  return {
+    books: state.books,
+    loaded: state.loaded
+  };
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps)(BookListController);
+
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./BaseController":"src/controllers/BaseController.js","../components/Layout":"src/components/Layout.js","../components/BookList":"src/components/BookList.js","react-redux":"../node_modules/react-redux/es/index.js","../components/Loading":"src/components/Loading.js"}],"src/components/Chapter.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactRouterDom = require("react-router-dom");
+
+var _ListItem = _interopRequireDefault(require("./ListItem"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Chapter = function Chapter(props) {
+  console.log('Chapter.props: ', props);
+  var href = "/".concat(props.book.name.toLowerCase(), "/chapter/").concat(props.chapter.number);
+  console.log('Chapter.href:', href);
+  return _react.default.createElement(_reactRouterDom.Link, {
+    to: href
+  }, _react.default.createElement(_ListItem.default, {
+    className: "chapter"
+  }, "Chapter ", props.chapter.number));
+};
+
+var _default = Chapter;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./ListItem":"src/components/ListItem.js"}],"src/components/ChapterList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _Chapter = _interopRequireDefault(require("./Chapter"));
+
+var _utils = require("../utils");
+
+var _List = _interopRequireDefault(require("./List"));
+
+var _Nav = _interopRequireDefault(require("./Nav"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var ChapterList =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(ChapterList, _Component);
+
+  function ChapterList() {
+    _classCallCheck(this, ChapterList);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(ChapterList).apply(this, arguments));
+  }
+
+  _createClass(ChapterList, [{
+    key: "render",
+    value: function render() {
+      console.log('ChapterList.props: ', this.props);
+      var book = this.props.book;
+      var chapters = (0, _utils.arr)(this.props.chapters).filter(function (chapter) {
+        return chapter.book_id === book.id;
+      });
+      console.log('FLATTENED CHAPTERS', chapters);
+      return _react.default.createElement("div", null, _react.default.createElement(_Nav.default, null), _react.default.createElement(_List.default, {
+        className: "chapter-list"
+      }, chapters.map(function (chapter) {
+        return _react.default.createElement(_Chapter.default, {
+          book: book,
+          chapter: chapter,
+          key: chapter.id
+        });
+      })));
+    }
+  }]);
+
+  return ChapterList;
+}(_react.Component);
+
+var _default = ChapterList;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./Chapter":"src/components/Chapter.js","../utils":"src/utils/index.js","./List":"src/components/List.js","./Nav":"src/components/Nav.js"}],"src/controllers/ChapterListController.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _BaseController2 = _interopRequireDefault(require("./BaseController"));
+
+var _Layout = _interopRequireDefault(require("../components/Layout"));
+
+var _ChapterList = _interopRequireDefault(require("../components/ChapterList"));
+
+var _reactRedux = require("react-redux");
+
+var _Loading = _interopRequireDefault(require("../components/Loading"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var ChapterListController =
+/*#__PURE__*/
+function (_BaseController) {
+  _inherits(ChapterListController, _BaseController);
+
+  function ChapterListController() {
+    _classCallCheck(this, ChapterListController);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(ChapterListController).apply(this, arguments));
+  }
+
+  _createClass(ChapterListController, [{
+    key: "render",
+    value: function render() {
+      console.log('ChapterListController.props: ', this.props);
+
+      if (!this.props.loaded) {
+        return _react.default.createElement(_Loading.default, null);
+      }
+
+      return _react.default.createElement(_ChapterList.default, {
+        chapters: this.chapters,
+        book: this.book
+      });
+    }
+  }]);
+
+  return ChapterListController;
+}(_BaseController2.default);
+
+var mapStateToProps = function mapStateToProps(state) {
+  console.log('STATE', state);
+  return {
+    books: state.books,
+    chapters: state.chapters,
+    loaded: state.loaded
+  };
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps)(ChapterListController);
+
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./BaseController":"src/controllers/BaseController.js","../components/Layout":"src/components/Layout.js","../components/ChapterList":"src/components/ChapterList.js","react-redux":"../node_modules/react-redux/es/index.js","../components/Loading":"src/components/Loading.js"}],"src/components/Track.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactRouterDom = require("react-router-dom");
+
+var _ListItem = _interopRequireDefault(require("./ListItem"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Track = function Track(props) {
+  var href = "/".concat(props.book.name.toLowerCase(), "/chapter/").concat(props.chapter.number, "/track/").concat(props.track.number);
+  return _react.default.createElement(_reactRouterDom.Link, {
+    to: href
+  }, _react.default.createElement(_ListItem.default, {
+    className: "track"
+  }, _react.default.createElement("div", {
+    className: "track-title"
+  }, props.track.title), _react.default.createElement("div", {
+    className: "track-file"
+  }, props.track.file)));
+};
+
+var _default = Track;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./ListItem":"src/components/ListItem.js"}],"src/components/TrackList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _Track = _interopRequireDefault(require("./Track"));
+
+var _utils = require("../utils");
+
+var _List = _interopRequireDefault(require("./List"));
+
+var _Nav = _interopRequireDefault(require("./Nav"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var TrackList =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(TrackList, _Component);
+
+  function TrackList() {
+    _classCallCheck(this, TrackList);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(TrackList).apply(this, arguments));
+  }
+
+  _createClass(TrackList, [{
+    key: "render",
+    value: function render() {
+      console.log('TrackList.props: ', this.props);
+      var book = this.props.book;
+      var chapter = this.props.chapter;
+      var tracks = (0, _utils.arr)(this.props.tracks).filter(function (track) {
+        return track.book_id === book.id && track.chapter_id === chapter.id;
+      });
+      return _react.default.createElement("div", null, _react.default.createElement(_Nav.default, null, "Back"), _react.default.createElement(_List.default, {
+        className: "track-list"
+      }, tracks.map(function (track) {
+        return _react.default.createElement(_Track.default, {
+          book: book,
+          chapter: chapter,
+          track: track,
+          key: track.id
+        });
+      })));
+    }
+  }]);
+
+  return TrackList;
+}(_react.Component);
+
+var _default = TrackList;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./Track":"src/components/Track.js","../utils":"src/utils/index.js","./List":"src/components/List.js","./Nav":"src/components/Nav.js"}],"src/controllers/TrackListController.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _BaseController2 = _interopRequireDefault(require("./BaseController"));
+
+var _TrackList = _interopRequireDefault(require("../components/TrackList"));
+
+var _reactRedux = require("react-redux");
+
+var _Loading = _interopRequireDefault(require("../components/Loading"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var TrackListController =
+/*#__PURE__*/
+function (_BaseController) {
+  _inherits(TrackListController, _BaseController);
+
+  function TrackListController() {
+    _classCallCheck(this, TrackListController);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(TrackListController).apply(this, arguments));
+  }
+
+  _createClass(TrackListController, [{
+    key: "render",
+    value: function render() {
+      if (!this.props.loaded) {
+        return _react.default.createElement(_Loading.default, null);
+      }
+
+      return _react.default.createElement(_TrackList.default, {
+        book: this.book,
+        chapter: this.chapter,
+        tracks: this.tracks
+      });
+    }
+  }]);
+
+  return TrackListController;
+}(_BaseController2.default);
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    books: state.books,
+    chapters: state.chapters,
+    tracks: state.tracks,
+    loaded: state.loaded
+  };
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps)(TrackListController);
+
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./BaseController":"src/controllers/BaseController.js","../components/TrackList":"src/components/TrackList.js","react-redux":"../node_modules/react-redux/es/index.js","../components/Loading":"src/components/Loading.js"}],"src/components/Player.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _Nav = _interopRequireDefault(require("./Nav"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+var Player =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(Player, _Component);
+
+  function Player(props) {
+    var _this;
+
+    _classCallCheck(this, Player);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Player).call(this, props));
+    _this.state = {
+      source: props.track.source,
+      speed: 1.0,
+      audio: null,
+      input: null
+    };
+    _this.changeSpeed = _this.changeSpeed.bind(_assertThisInitialized(_assertThisInitialized(_this)));
+    return _this;
+  }
+
+  _createClass(Player, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var audio = document.querySelector('#audio');
+      var input = document.querySelector('#speed');
+      this.setState({
+        audio: audio,
+        input: input
+      });
+
+      if (this.props.settings.autoplay && audio.paused) {
+        audio.play();
+      }
+    }
+  }, {
+    key: "nextTrack",
+    value: function nextTrack() {}
+  }, {
+    key: "previousTrack",
+    value: function previousTrack() {}
+  }, {
+    key: "changeSpeed",
+    value: function changeSpeed(event) {
+      event.persist();
+      var input = event.target;
+      var speed = parseFloat(event.target.value);
+      this.state.audio.playbackRate = speed;
+      this.setState({
+        speed: speed
+      });
+      console.log('speed: ', speed);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return _react.default.createElement("div", null, _react.default.createElement("div", {
+        className: "player-title"
+      }, _react.default.createElement("div", {
+        className: "book-chapter"
+      }, this.props.book.name, " / chapter ", this.props.chapter.number), _react.default.createElement("div", {
+        className: "track"
+      }, this.props.track.title)), _react.default.createElement(_Nav.default, null), _react.default.createElement("div", null, _react.default.createElement("audio", {
+        id: "audio",
+        src: this.state.source,
+        controls: true,
+        autoPlay: this.props.settings.autoplay
+      })), _react.default.createElement("div", {
+        style: {
+          margin: '10px'
+        }
+      }, _react.default.createElement("div", null, _react.default.createElement("input", {
+        id: "speed",
+        onInput: this.changeSpeed,
+        type: "range",
+        min: "0.1",
+        max: "1.0",
+        step: "0.1",
+        defaultValue: this.state.speed
+      })), _react.default.createElement("div", {
+        className: "audio-speed-label"
+      }, this.state.speed, "x Speed")));
+    }
+  }]);
+
+  return Player;
+}(_react.Component);
+
+var _default = Player;
+exports.default = _default;
+},{"react":"../node_modules/react/index.js","./Nav":"src/components/Nav.js"}],"src/components/Settings.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31001,10 +32179,6 @@ var _reactRedux = require("react-redux");
 
 var _actions = require("../actions");
 
-var _Book = _interopRequireDefault(require("./Book"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -31025,63 +32199,91 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-var BookSelect =
+var Settings =
 /*#__PURE__*/
 function (_Component) {
-  _inherits(BookSelect, _Component);
+  _inherits(Settings, _Component);
 
-  function BookSelect(props) {
+  function Settings(props) {
     var _this;
 
-    _classCallCheck(this, BookSelect);
+    _classCallCheck(this, Settings);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(BookSelect).call(this, props));
-    _this.bookSelected = _this.bookSelected.bind(_assertThisInitialized(_assertThisInitialized(_this)));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Settings).call(this, props));
+    _this.state = {
+      settingsVisible: false
+    };
+    _this.toggleSettings = _this.toggleSettings.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     return _this;
   }
 
-  _createClass(BookSelect, [{
-    key: "bookSelected",
-    value: function bookSelected(event) {
-      this.props.onSelectBook();
+  _createClass(Settings, [{
+    key: "toggleSettings",
+    value: function toggleSettings() {
+      this.setState({
+        settingsVisible: !this.state.settingsVisible
+      });
     }
   }, {
     key: "render",
     value: function render() {
+      var settingsClassname = 'settings';
+
+      if (this.state.settingsVisible) {
+        settingsClassname += ' open';
+      }
+
       return _react.default.createElement("div", {
-        className: "book-select-wrap"
-      }, _react.default.createElement(_Book.default, {
-        onBookSelected: this.props.onBookSelected,
-        book: "Textbook"
-      }), _react.default.createElement(_Book.default, {
-        onBookSelected: this.props.onBookSelected,
-        book: "Workbook"
-      }));
+        className: settingsClassname
+      }, _react.default.createElement("div", {
+        className: "settings-header",
+        onClick: this.toggleSettings
+      }, "Settings"), _react.default.createElement("div", {
+        className: "settings-body"
+      }, _react.default.createElement("div", null, _react.default.createElement("input", {
+        id: "autoplay",
+        onChange: this.props.toggleAutoplay,
+        type: "checkbox",
+        checked: this.props.settings.autoplay
+      }), _react.default.createElement("label", {
+        htmlFor: "autoplay"
+      }, "Autoplay")), _react.default.createElement("div", null, _react.default.createElement("input", {
+        id: "auto-advance",
+        onChange: this.props.toggleAutoAdvance,
+        type: "checkbox",
+        checked: this.props.settings.autoAdvance
+      }), _react.default.createElement("label", {
+        htmlFor: "auto-advance",
+        title: "Automatically advance to the next track in this chapter when current track finishes"
+      }, "Auto-advance"))));
     }
   }]);
 
-  return BookSelect;
+  return Settings;
 }(_react.Component);
 
 var mapStateToProps = function mapStateToProps(state) {
-  var books = Object.keys(state.tracks);
+  console.log('SETTINGS STATE', state);
   return {
-    books: books
+    settings: state.settings
   };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
-    onBookSelected: function onBookSelected(book) {
-      dispatch((0, _actions.selectBook)(book));
+    toggleAutoplay: function toggleAutoplay() {
+      dispatch((0, _actions.toggleAutoplay)());
+    },
+    toggleAutoAdvance: function toggleAutoAdvance() {
+      dispatch((0, _actions.toggleAutoAdvance)());
     }
   };
 };
 
-var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(BookSelect);
+var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Settings);
 
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","react-redux":"../node_modules/react-redux/es/index.js","../actions":"src/actions/index.js","./Book":"src/components/Book.js"}],"src/controllers/BookSelectController.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-redux":"../node_modules/react-redux/es/index.js","../actions":"src/actions/index.js"}],"src/controllers/PlayerController.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31089,15 +32291,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireWildcard(require("react"));
+var _react = _interopRequireDefault(require("react"));
 
-var _Layout = _interopRequireDefault(require("../components/Layout"));
+var _BaseController2 = _interopRequireDefault(require("./BaseController"));
 
-var _BookSelect = _interopRequireDefault(require("../components/BookSelect"));
+var _Player = _interopRequireDefault(require("../components/Player"));
+
+var _reactRedux = require("react-redux");
+
+var _Loading = _interopRequireDefault(require("../components/Loading"));
+
+var _Settings = _interopRequireDefault(require("../components/Settings"));
+
+var _utils = require("../utils");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -31117,30 +32325,61 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var BookSelectController =
+var PlayerController =
 /*#__PURE__*/
-function (_Component) {
-  _inherits(BookSelectController, _Component);
+function (_BaseController) {
+  _inherits(PlayerController, _BaseController);
 
-  function BookSelectController() {
-    _classCallCheck(this, BookSelectController);
+  function PlayerController() {
+    _classCallCheck(this, PlayerController);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(BookSelectController).apply(this, arguments));
+    return _possibleConstructorReturn(this, _getPrototypeOf(PlayerController).apply(this, arguments));
   }
 
-  _createClass(BookSelectController, [{
+  _createClass(PlayerController, [{
     key: "render",
     value: function render() {
-      return _react.default.createElement(_Layout.default, null, _react.default.createElement(_BookSelect.default, null));
+      if (!this.props.loaded) {
+        return _react.default.createElement(_Loading.default, null);
+      }
+
+      var book = this.book;
+      var chapter = this.chapter;
+      var track = this.track;
+      var tracks = (0, _utils.arr)(this.tracks).filter(function (track) {
+        return track.book_id === book.id && track.chapter_id === chapter.id;
+      });
+      var nextTrack = track.number < tracks.length ? track.number + 1 : track.number;
+      var previousTrack = track.number > 1 ? track.number - 1 : track.number;
+      return _react.default.createElement("div", null, _react.default.createElement(_Player.default, {
+        book: book,
+        chapter: chapter,
+        track: this.track,
+        settings: this.props.settings,
+        trackCount: tracks.length,
+        prev: previousTrack,
+        next: nextTrack
+      }), _react.default.createElement(_Settings.default, null));
     }
   }]);
 
-  return BookSelectController;
-}(_react.Component);
+  return PlayerController;
+}(_BaseController2.default);
 
-var _default = BookSelectController;
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    books: state.books,
+    chapters: state.chapters,
+    tracks: state.tracks,
+    loaded: state.loaded,
+    settings: state.settings
+  };
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps)(PlayerController);
+
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","../components/Layout":"src/components/Layout.js","../components/BookSelect":"src/components/BookSelect.js"}],"src/AppRouter.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","./BaseController":"src/controllers/BaseController.js","../components/Player":"src/components/Player.js","react-redux":"../node_modules/react-redux/es/index.js","../components/Loading":"src/components/Loading.js","../components/Settings":"src/components/Settings.js","../utils":"src/utils/index.js"}],"src/AppRouter.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31152,7 +32391,15 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _reactRouterDom = require("react-router-dom");
 
-var _BookSelectController = _interopRequireDefault(require("./controllers/BookSelectController"));
+var _BookListController = _interopRequireDefault(require("./controllers/BookListController"));
+
+var _ChapterListController = _interopRequireDefault(require("./controllers/ChapterListController"));
+
+var _TrackListController = _interopRequireDefault(require("./controllers/TrackListController"));
+
+var _PlayerController = _interopRequireDefault(require("./controllers/PlayerController"));
+
+var _Layout = _interopRequireDefault(require("./components/Layout"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -31190,11 +32437,23 @@ function (_Component) {
   _createClass(AppRouter, [{
     key: "render",
     value: function render() {
-      return _react.default.createElement(_reactRouterDom.BrowserRouter, null, _react.default.createElement(_reactRouterDom.Route, {
+      return _react.default.createElement(_reactRouterDom.BrowserRouter, null, _react.default.createElement(_Layout.default, null, _react.default.createElement(_reactRouterDom.Route, {
         path: "/",
         exact: true,
-        component: _BookSelectController.default
-      }));
+        component: _BookListController.default
+      }), _react.default.createElement(_reactRouterDom.Route, {
+        path: "/:book",
+        exact: true,
+        component: _ChapterListController.default
+      }), _react.default.createElement(_reactRouterDom.Route, {
+        path: "/:book/chapter/:chapter",
+        exact: true,
+        component: _TrackListController.default
+      }), _react.default.createElement(_reactRouterDom.Route, {
+        path: "/:book/chapter/:chapter/track/:track",
+        exact: true,
+        component: _PlayerController.default
+      })));
     }
   }]);
 
@@ -31203,7 +32462,7 @@ function (_Component) {
 
 var _default = AppRouter;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./controllers/BookSelectController":"src/controllers/BookSelectController.js"}],"src/App.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/es/index.js","./controllers/BookListController":"src/controllers/BookListController.js","./controllers/ChapterListController":"src/controllers/ChapterListController.js","./controllers/TrackListController":"src/controllers/TrackListController.js","./controllers/PlayerController":"src/controllers/PlayerController.js","./components/Layout":"src/components/Layout.js"}],"src/App.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31312,7 +32571,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62878" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58508" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
@@ -31455,4 +32714,4 @@ function hmrAccept(bundle, id) {
   });
 }
 },{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
-//# sourceMappingURL=assets/main.1f19ae8e.map
+//# sourceMappingURL=/assets/main.1f19ae8e.map

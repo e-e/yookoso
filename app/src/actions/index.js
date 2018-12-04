@@ -8,6 +8,9 @@ export const DESELECT_TRACK = 'DESELECT_TRACK';
 export const FETCH_DATA = 'FETCH_DATA';
 export const FETCHED_DATA = 'FETCHED_DATA';
 
+export const TOGGLE_AUTOPLAY = 'TOGGLE_AUTOPLAY';
+export const TOGGLE_AUTO_ADVANCE = 'TOGGLE_AUTO_ADVANCE';
+
 export function selectBook(book) {
   console.log('SELECT_BOOK', book);
   return (dispatch, getState) => {
@@ -25,4 +28,40 @@ export function selectTrack(track) {
   return (dispatch, getState) => {
     dispatch({ type: SELECT_TRACK, track });
   };
+}
+
+export function fetchData() {
+  return (dispatch, getState) => {
+    dispatch({
+      type: FETCH_DATA,
+    });
+  };
+}
+
+export function fetchedData(data) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: FETCHED_DATA,
+      data: data
+    });
+  };
+}
+
+export function toggleAutoplay() {
+  console.log('toggle autoplay');
+  return (dispatch) => {
+    dispatch({
+      type: TOGGLE_AUTOPLAY
+    })
+  }
+}
+
+export function toggleAutoAdvance() {
+  console.log('toggleAutoAdvance');
+  return (dispatch) => {
+    console.log('dispatch toggleAutoAdvance');
+    dispatch({
+      type: TOGGLE_AUTO_ADVANCE
+    })
+  }
 }

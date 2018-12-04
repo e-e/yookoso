@@ -1,16 +1,16 @@
 import React from 'react';
-
-function click(book, callback) {
-  console.log('clickeD!');
-  console.log('book: ', book);
-  callback(book);
-}
+import { Link } from 'react-router-dom';
+import ListItem from './ListItem';
 
 const Book = props => {
+  const href = '/' + props.book.name.toLowerCase();
+  console.log('Chapter.href:', href);
   return (
-    <div onClick={event => click(props.book, props.onBookSelected)}>
-      {props.book}
-    </div>
+    <Link to={href} className="book-link">
+      <ListItem className="book">
+        {props.book.name}
+      </ListItem>
+    </Link>
   )
 };
 

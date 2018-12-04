@@ -1,3 +1,4 @@
+const path = require('path');
 const env = process.env.NODE_ENV || 'dev';
 /**
  * @type {Object}
@@ -6,5 +7,10 @@ const env = process.env.NODE_ENV || 'dev';
  * @property {String} basepath
  * @property {Object} users
  */
-const config = require(`./${env}`);
-module.exports = config;
+const options = require(`./${env}`);
+const basepath = path.join(__dirname, '../');
+const config = {
+  basepath: basepath,
+  datapath: path.join(basepath, '../data/tracks.json'),
+};
+module.exports = Object.assign({}, config, options);

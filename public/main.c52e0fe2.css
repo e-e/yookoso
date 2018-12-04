@@ -1,5 +1,165 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
 body {
+    margin:0;
+    padding:0;
+    color: #444;
+    font-family: 'Roboto', sans-serif;
+    color: #444;
+}
+body a {
+    color:#444;
+}
+
+.app-wrap {
+    display:flex;
+    flex-direction: column;
+}
+.content-wrap {
+    padding-top:15px;
+    display:flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.title-bar {
+
+}
+.title-bar .title {
+    font-size: 3em;
+    text-align:center;
+    box-shadow: 0 4px 15px 0 rgba(0,0,0,0.2);
+}
+.title-bar .back {
+    position: absolute;
+    top: 30px;
+    left:5px;
+}
+
+.list {
     margin:0;
     padding:0;
 }
 
+.list-item {
+    list-style-type:none;
+    margin:15px;
+    padding:25px 15px;
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 15px 0 rgba(0,0,0,0.2);
+
+    border-left:2px solid rgba(205,92,92, 0.3);
+    transition: 0.3s;
+}
+/* On mouse-over, add a deeper shadow */
+.list-item:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+a {
+    text-decoration: none;
+}
+
+.book {
+    font-size: 2em;
+    text-align:center;
+}
+
+.chapter {
+    font-size: 1.5em;
+    text-align:center;
+}
+
+.track {
+    font-size: 1.2em;
+}
+.track-title {
+    margin-bottom:10px;
+}
+.track-file {
+    font-size:0.6em;
+    text-align:left;
+}
+
+audio {
+    width:100%;
+}
+
+input[type=range] {
+    width:100%;
+}
+
+#loading {
+    width:100%;
+}
+
+.audio-speed-label {
+    margin-top:10px;
+    text-align:center;
+    font-weight: bolder;
+    font-size:0.9em;
+}
+
+
+.settings {
+    width:100%;
+    position: absolute;
+    bottom: 0;
+    color:#666;
+    text-transform: uppercase;
+    font-size: 0.8em;
+}
+
+.settings-header {
+    text-align:center;
+
+    font-weight:lighter;
+    border-top:1px solid rgba(100, 100, 100, 0.5);
+    border-bottom:1px solid rgba(100, 100, 100, 0.5);
+    cursor:pointer;
+    padding: 6px 10px;
+}
+
+.settings-body {
+    display:none;
+    padding: 15px 10px;
+}
+
+.settings.open .settings-header {
+    font-weight:bolder;
+    /*box-shadow: 0 4px 15px 0 rgba(0,0,0,0.2);*/
+    /*border-top:none;*/
+    /*border-bottom:1px solid rgba(100, 100, 100, 0.5);*/
+}
+
+.settings.open .settings-body {
+    display:block;
+}
+
+nav {
+    padding: 15px;
+}
+.back-button {
+    color:#444;
+    text-transform: uppercase;
+    font-weight:bolder;
+    font-size:0.9em;
+    background-color:rgba(0, 0, 0, 0);
+    border:none;
+}
+
+
+.player-title {
+    padding:15px;
+}
+.player-title .book-chapter {
+    font-size: 1.2em;
+    font-weight:bolder;
+    text-transform: capitalize;
+    text-align: center;
+}
+.player-title .track {
+    text-align: center;
+    font-weight:lighter;
+    font-size: 0.9em;
+}
