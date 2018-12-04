@@ -10,6 +10,6 @@ const staticAssetPath = path.join(config.basepath, '../public');
 const staticAssets = express.static(staticAssetPath);
 
 router.use('/assets', staticAssets);
-router.get('/', controller.index);
+router.get('/*', controller.index.bind(controller));
 
 module.exports = router;

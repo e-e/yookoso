@@ -1,37 +1,17 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { selectBook } from "../actions";
 import Book from './Book';
+import List from './List';
 
-class BookSelect extends Component {
-  constructor(props) {
-    super(props);
-    this.bookSelected = this.bookSelected.bind(this);
-  }
-  bookSelected(event) {
-    this.props.onSelectBook()
-  }
+class BookList extends Component {
   render() {
+    const books = Object.keys(this.props.books);
+    const bookList = books.map(id => this.props.books[id]);
     return (
-      <div className="book-select-wrap">
-        <Book onBookSelected={this.props.onBookSelected} book="Textbook" />
-        <Book onBookSelected={this.props.onBookSelected} book="Workbook" />
-      </div>
+      <List className="book-list">
+        {bookList.map(book => <Book book={book} key={book.id} />)}
+      </List>
     );
   }
 }
 
-const mapStateToProps = state => {
-  let books = Object.keys(state.tracks);
-  return { books };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onBookSelected: book => {
-      dispatch(selectBook(book))
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(BookSelect);
+export default BookList;

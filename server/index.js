@@ -16,6 +16,9 @@ const auth = basicAuth({
 
 app.use(morgan('dev'));
 app.use(auth);
+
+app.use('/audio', routes.audio);
+app.use('/api', routes.api);
 app.use('/', routes.index);
 
 app.listen(config.port, function() {
