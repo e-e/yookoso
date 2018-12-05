@@ -1,3 +1,7 @@
+// node
+const fs = require('fs');
+const path = require('fs');
+
 // modules
 const express = require('express');
 const basicAuth = require('express-basic-auth');
@@ -14,7 +18,7 @@ const auth = basicAuth({
   challenge: true,
 });
 
-app.use(morgan('dev'));
+app.use(getLogger());
 app.use(auth);
 
 app.use('/audio', routes.audio);
@@ -24,3 +28,15 @@ app.use('/', routes.index);
 app.listen(config.port, function() {
   console.log(`Listening on http://localhost:${config.port}`);
 });
+
+function getLogger() {
+  if (process.env.NODE_ENV === 'dev') {
+    return morgan('dev');
+  }
+  return morgan('common', {
+    stream: fs.createWriteStream(
+      config.logfile,
+      { flags: 'a' }
+    )
+  });
+}
