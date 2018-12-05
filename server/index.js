@@ -26,11 +26,13 @@ app.use('/api', routes.api);
 app.use('/', routes.index);
 
 app.listen(config.port, function() {
-  console.log(`Listening on http://localhost:${config.port}`);
+  if (config.env === 'dev') {
+    console.log(`Listening on http://localhost:${config.port}`);
+  }
 });
 
 function getLogger() {
-  if (process.env.NODE_ENV === 'dev') {
+  if (config.env === 'dev') {
     return morgan('dev');
   }
   return morgan('common', {

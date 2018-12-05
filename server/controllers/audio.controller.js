@@ -48,7 +48,6 @@ class ApiController extends Controller {
   }
   serve(req, res) {
     const filepath = path.join(config.filespath, `${req.params.file}`);
-    console.log('FILEPATH', filepath);
     this.stream(req, res, filepath);
   }
 }
