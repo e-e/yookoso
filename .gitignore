@@ -3,3 +3,4 @@ node_modules
 .idea
 data/**/*.m4a
 data/**/*.mp3
+server/config/prod.js
