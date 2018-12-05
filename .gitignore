@@ -5,3 +5,5 @@ data/**/*.m4a
 data/**/*.mp3
 server/config/prod.js
 logs/*.log
+public/*
+!public/.gitkeep 

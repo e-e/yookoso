@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import gif from '../../images/loading.gif';
 
 class Loading extends Component {
   constructor(props) {
@@ -34,7 +35,7 @@ class Loading extends Component {
   render() {
     return (
       <div>
-        <img id="loading" src="/assets/loading.gif" />
+        <img id="loading" src={gif} />
         <div id="loading-text">Loading{this.state.dots}</div>
       </div>
     );
