@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Nav from './Nav';
+import Header from './Header';
 
 class Player extends Component {
   constructor(props) {
@@ -44,14 +45,10 @@ class Player extends Component {
   render() {
     return (
       <div>
-        <div className="player-title">
-          <div className="book-chapter">
-            { this.props.book.name } / chapter { this.props.chapter.number }
-          </div>
-          <div className="track">
-            { this.props.track.title }
-          </div>
-        </div>
+        <Header
+          book={this.props.book.name}
+          chapter={this.props.chapter.number}
+          track={this.props.track.title}  />
 
         <Nav />
 
@@ -60,7 +57,7 @@ class Player extends Component {
         </div>
         <div style={{margin: '10px'}}>
           <div>
-            <input id="speed" onInput={this.changeSpeed} type="range" min="0.1" max="1.0" step="0.1" defaultValue={this.state.speed} />
+            <input className="slider" id="speed" onInput={this.changeSpeed} type="range" min="0.1" max="1.0" step="0.1" defaultValue={this.state.speed} />
           </div>
           <div className="audio-speed-label">
             { this.state.speed }x Speed

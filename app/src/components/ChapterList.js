@@ -3,6 +3,7 @@ import Chapter from './Chapter';
 import { arr } from '../utils';
 import List from './List';
 import Nav from './Nav';
+import Header from "./Header";
 
 class ChapterList extends Component {
   render() {
@@ -16,6 +17,7 @@ class ChapterList extends Component {
     return (
       <div>
         <Nav />
+        <Header book={book.name} />
         <List className="chapter-list">
           {chapters.map(chapter => <Chapter book={book} chapter={chapter} key={chapter.id} />)}
         </List>

@@ -12,5 +12,6 @@ const basepath = path.join(__dirname, '../');
 const config = {
   basepath: basepath,
   datapath: path.join(basepath, '../data/tracks.json'),
+  filespath: path.join(basepath, '../data/sanitized'),
 };
 module.exports = Object.assign({}, config, options);

@@ -8,7 +8,7 @@ const Back = withRouter(props => {
   return history.location.pathname !== "/"
     ? (
       <button className="back-button top-left" onClick={() => history.goBack()}>
-        &lsaquo; Back
+        <span>&lsaquo;</span> Back
       </button>
     ) : null;
 });

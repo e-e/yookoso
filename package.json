@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "parcel build ./app/index.html --out-dir=public --public-url=/assets/",
     "start": "cross-env NODE_ENV=prod node ./server/index.js",
     "dev-serve": "cross-env NODE_ENV=dev nodemon ./server/index.js",
     "dev-app": "parcel watch ./app/index.html --out-dir=public --public-url=/assets/",

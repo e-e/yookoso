@@ -3,6 +3,7 @@ import Track from './Track';
 import { arr } from '../utils';
 import List from './List';
 import Nav from './Nav';
+import Header from './Header';
 
 class TrackList extends Component {
   render() {
@@ -17,6 +18,7 @@ class TrackList extends Component {
     return (
       <div>
         <Nav>Back</Nav>
+        <Header book={book.name} chapter={chapter.number} />
         <List className="track-list">
           {tracks.map(track => <Track book={book} chapter={chapter} track={track} key={track.id} />)}
         </List>

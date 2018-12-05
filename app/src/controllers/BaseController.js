@@ -18,7 +18,7 @@ class BaseController extends Component {
         .then(json => {
           setTimeout(() => {
             this.props.dispatch(fetchedData(json));
-          }, 2000);
+          }, 5000);
         });
     }
 

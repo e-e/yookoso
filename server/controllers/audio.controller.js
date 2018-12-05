@@ -7,7 +7,6 @@ class ApiController extends Controller {
   stream(req, res, file) {
     fs.stat(file, function(err, stats) {
       if (err) {
-        console.log('EEEEEERRRRRR', err);
         if (err.code === 'ENOENT') {
           console.log('CANT FIND IT!');
           // 404 Error if file not found
@@ -49,8 +48,7 @@ class ApiController extends Controller {
     });
   }
   serve(req, res) {
-    const filepath = path.join(config.basepath, `../data/sanitized/${req.params.file}`);
-    console.log('FILEPATH', filepath);
+    const filepath = path.join(config.filespath, `${req.params.file}`);
     this.stream(req, res, filepath);
   }
 }

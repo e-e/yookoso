@@ -140,12 +140,15 @@ nav {
     padding: 15px;
 }
 .back-button {
-    color:#444;
+    color:#666;
     text-transform: uppercase;
     font-weight:bolder;
     font-size:0.9em;
     background-color:rgba(0, 0, 0, 0);
     border:none;
+}
+.back-button span {
+    padding-bottom:10px;
 }
 
 
@@ -162,4 +165,11 @@ nav {
     text-align: center;
     font-weight:lighter;
     font-size: 0.9em;
+}
+#loading-text {
+    text-align:center;
+    font-weight:bolder;
+    position: absolute;
+    bottom:0;
+    margin:15px;
 }
