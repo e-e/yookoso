@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Nav from './Nav';
 import Header from './Header';
+import { debug } from '../utils';
 
 class Player extends Component {
   constructor(props) {
@@ -40,7 +41,8 @@ class Player extends Component {
 
     this.state.audio.playbackRate = speed;
     this.setState({ speed });
-    console.log('speed: ', speed);
+
+    debug('speed: ', speed);
   }
   render() {
     return (

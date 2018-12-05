@@ -13,8 +13,10 @@ import {
 } from '../actions';
 import {
   setLocalSettings,
-  getLocalSettings
+  getLocalSettings,
+  debug,
 } from "../utils";
+
 
 /**
  * @param {String} state
@@ -89,7 +91,7 @@ function settings(state = DEFAULT_SETTINGS, action) {
   let newSettings = state;
   switch (action.type) {
     case TOGGLE_AUTOPLAY:
-      console.log('toggling autoplay...');
+      debug('toggling autoplay...');
       newSettings = { ...state, autoplay: !state.autoplay };
       break;
     case TOGGLE_AUTO_ADVANCE:

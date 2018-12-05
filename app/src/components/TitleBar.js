@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import Nav from './Nav';
+import { debug } from '../utils';
 
 const Back = withRouter(props => {
   const { history } = props;
-  console.log('HISTORY', history);
+  debug('HISTORY', history);
   return history.location.pathname !== "/"
     ? (
       <button className="back-button top-left" onClick={() => history.goBack()}>

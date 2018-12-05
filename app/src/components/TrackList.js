@@ -4,10 +4,11 @@ import { arr } from '../utils';
 import List from './List';
 import Nav from './Nav';
 import Header from './Header';
+import { debug } from '../utils';
 
 class TrackList extends Component {
   render() {
-    console.log('TrackList.props: ', this.props);
+    debug('TrackList.props: ', this.props);
     const book = this.props.book;
     const chapter = this.props.chapter;
     const tracks = arr(this.props.tracks).filter(track => {

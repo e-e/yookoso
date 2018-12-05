@@ -1,3 +1,5 @@
+import { debug } from '../utils';
+
 export const SELECT_BOOK = 'SELECT_BOOK';
 export const DESELECT_BOOK = 'DESELECT_BOOK';
 export const SELECT_CHAPTER = 'SELECT_CHAPTER';
@@ -12,7 +14,7 @@ export const TOGGLE_AUTOPLAY = 'TOGGLE_AUTOPLAY';
 export const TOGGLE_AUTO_ADVANCE = 'TOGGLE_AUTO_ADVANCE';
 
 export function selectBook(book) {
-  console.log('SELECT_BOOK', book);
+  debug('SELECT_BOOK', book);
   return (dispatch, getState) => {
     dispatch({ type: SELECT_BOOK, book });
   };
@@ -48,7 +50,7 @@ export function fetchedData(data) {
 }
 
 export function toggleAutoplay() {
-  console.log('toggle autoplay');
+  debug('toggle autoplay');
   return (dispatch) => {
     dispatch({
       type: TOGGLE_AUTOPLAY
@@ -57,9 +59,9 @@ export function toggleAutoplay() {
 }
 
 export function toggleAutoAdvance() {
-  console.log('toggleAutoAdvance');
+  debug('toggleAutoAdvance');
   return (dispatch) => {
-    console.log('dispatch toggleAutoAdvance');
+    debug('dispatch toggleAutoAdvance');
     dispatch({
       type: TOGGLE_AUTO_ADVANCE
     })

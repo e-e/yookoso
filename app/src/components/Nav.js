@@ -1,8 +1,10 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
+import { debug } from '../utils';
 
 const Nav = props => {
-  console.dir(props);
+  debug(props);
+
   return null;
   return (
     <nav>

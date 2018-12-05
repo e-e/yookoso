@@ -15,7 +15,7 @@ export function setLocalSettings(settings) {
 }
 export function getLocalSettings(settings) {
   if (window.localStorage && localStorage.getItem(SETTINGS_KEY) !== null) {
-    console.log(localStorage.getItem(SETTINGS_KEY));
+    debug(localStorage.getItem(SETTINGS_KEY));
     const localSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
     if (localSettings) {
       settings = localSettings;
@@ -23,4 +23,11 @@ export function getLocalSettings(settings) {
   }
 
   return settings;
+}
+
+export function debug() {
+  const isDev = window.location.host === 'localhost';
+  if (isDev) {
+    console.log.apply(null, arguments);
+  }
 }

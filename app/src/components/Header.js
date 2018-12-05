@@ -1,4 +1,5 @@
 import React from 'react';
+import { debug } from '../utils';
 
 const Header = props => {
   let bookChapter = props.book;
@@ -11,7 +12,7 @@ const Header = props => {
         { props.track }
       </div>
     ) : null;
-  console.log('HEADER.PROPS', props);
+  debug('HEADER.PROPS', props);
   return (
     <div className="player-title">
       <div className="book-chapter">{bookChapter}</div>

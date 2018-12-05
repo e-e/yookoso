@@ -4,13 +4,14 @@ import {
   toggleAutoplay,
   toggleAutoAdvance
 } from '../actions';
+import { debug } from '../utils';
 
 class Settings extends Component {
   constructor(props) {
     super(props);
     this.state = {
       settingsVisible: false,
-    }
+    };
     this.toggleSettings = this.toggleSettings.bind(this);
   }
   toggleSettings() {
@@ -45,7 +46,8 @@ class Settings extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log('SETTINGS STATE', state);
+  debug('SETTINGS STATE', state);
+
   return {
     settings: state.settings,
   }

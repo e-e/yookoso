@@ -4,15 +4,16 @@ import { arr } from '../utils';
 import List from './List';
 import Nav from './Nav';
 import Header from "./Header";
+import { debug } from '../utils';
 
 class ChapterList extends Component {
   render() {
-    console.log('ChapterList.props: ', this.props);
+    debug('ChapterList.props: ', this.props);
 
     const book = this.props.book;
     const chapters = arr(this.props.chapters).filter(chapter => chapter.book_id === book.id);
 
-    console.log('FLATTENED CHAPTERS', chapters);
+    debug('FLATTENED CHAPTERS', chapters);
 
     return (
       <div>

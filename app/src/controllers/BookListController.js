@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseController from './BaseController';
-import Layout from '../components/Layout';
 import BookList from '../components/BookList';
 import { connect } from "react-redux";
 import Loading from '../components/Loading';
+import { debug } from '../utils';
 
 class BookListController extends BaseController {
 
   render() {
-    console.log('BookListController.props: ', this.props);
+    debug('BookListController.props: ', this.props);
     if (!this.props.loaded) {
       return <Loading />;
     }
@@ -18,7 +18,7 @@ class BookListController extends BaseController {
 }
 
 const mapStateToProps = state => {
-  console.log('STATE', state);
+  debug('STATE', state);
   return {
     books: state.books,
     loaded: state.loaded

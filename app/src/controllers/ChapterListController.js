@@ -1,13 +1,13 @@
 import React from 'react';
 import BaseController from './BaseController';
-import Layout from '../components/Layout';
 import ChapterList from '../components/ChapterList';
 import { connect } from "react-redux";
 import Loading from '../components/Loading';
+import { debug } from '../utils';
 
 class ChapterListController extends BaseController {
   render() {
-    console.log('ChapterListController.props: ', this.props);
+    debug('ChapterListController.props: ', this.props);
     if (!this.props.loaded) {
       return <Loading />
     }
@@ -21,7 +21,7 @@ class ChapterListController extends BaseController {
 }
 
 const mapStateToProps = state => {
-  console.log('STATE', state);
+  debug('STATE', state);
   return {
     books: state.books,
     chapters: state.chapters,
