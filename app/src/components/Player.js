@@ -44,7 +44,7 @@ class Player extends Component {
   }
   render() {
     return (
-      <div>
+      <div className="player">
         <Header
           book={this.props.book.name}
           chapter={this.props.chapter.number}

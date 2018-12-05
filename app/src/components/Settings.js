@@ -27,6 +27,7 @@ class Settings extends Component {
       <div className={settingsClassname}>
         <div className="settings-header" onClick={this.toggleSettings}>
           Settings
+          <span className="settings-arrow">&#11165;</span>
         </div>
         <div className="settings-body">
           <div>
