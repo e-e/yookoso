@@ -13,5 +13,6 @@ const config = {
   basepath: basepath,
   datapath: path.join(basepath, '../data/tracks.json'),
   filespath: path.join(basepath, '../data/sanitized'),
+  audioExtn: 'mp3',
 };
 module.exports = Object.assign({}, config, options);

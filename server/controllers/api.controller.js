@@ -69,7 +69,7 @@ class ApiController extends Controller {
         this.convertTracksToArray(chapter.tracks).forEach(track => {
           track.book_id = book.id;
           track.chapter_id = chapter.id;
-          track.source = `/audio/${track.id}.m4a`;
+          track.source = `/audio/${track.id}.${config.audioExtn}`;
           tracks[track.id] = track;
         })
       });
